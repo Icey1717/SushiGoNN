@@ -1,0 +1,17 @@
+[package]
+name = "sushi_go_ai"
+version = "0.1.0"
+authors = ["Icey"]
+edition = "2018"
+
+
+
+[dependencies]
+rand = { git = "https://github.com/rust-lang-nursery/rand" }
+random_choice = "0.2.0"
+rulinalg="0.4.2"
+log = "0.4.6"
+rayon = "1.0.3"
+serde = "1.0.89"
+serde_derive = "1.0.89"
+serde_json = "1.0"
