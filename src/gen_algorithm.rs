@@ -23,13 +23,13 @@ pub fn run_generational(games: usize, generations: usize)
 		//let round_started = Instant::now();
 		
 		//---- Play out the round and get an array of the winners
-		let games = create_and_play_games_parallel(games, &mut nn);
+		let sushi_go_games = create_and_play_games_parallel(games, &mut nn, NUMBER_OF_PLAYERS, NeuralNetworkGameType::Create);
 
 		//---- Round Finished
 		//println!("Finished generation {0} in {1}", i, sec_from_time(round_started));
 
 		// Reset the neural networks we are using to just use the winners.
-		nn = next_generation(games);
+		nn = next_generation(sushi_go_games);
 	}
 	//---- Complete!
 	println!("The winner is {0} total time was {1}", nn[0].get_id(), sec_from_time(competition_started));

@@ -33,6 +33,8 @@ fn main()
 
     println!("Type 'Create' to create a new ai.");
 
+    println!("Type 'Random' to play an AI against a random opponent.");
+
     let mut guess = String::new();
 
     io::stdin().read_line(&mut guess)
@@ -42,6 +44,7 @@ fn main()
 	{
 		"Play" => play_player_game(),
 		"Create" => picked_generational(),
+		"Random" => setup_random_game(),
 		_ => println!("You didn't enter 'Play' or 'Create'. These are your only options, don't try and find anything else, there isn't anything to find."),
 	}
 }
@@ -53,7 +56,7 @@ fn main()
 
 fn picked_generational()
 {
-	run_generational(10, 10);
+	run_generational(64, 1000);
 }
 // #[bench]
 // fn bench_seq(b: &mut Bencher) 

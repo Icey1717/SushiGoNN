@@ -30,7 +30,7 @@ pub fn run_competition()
 		let number_of_games = (NUMBER_OF_PLAYERS as i32).pow(i as u32);
 		
 		//---- Play out the round and get an array of the winners
-		let games = create_and_play_games_parallel(number_of_games as usize, &mut nn);
+		let games = create_and_play_games_parallel(number_of_games as usize, &mut nn, NUMBER_OF_PLAYERS, NeuralNetworkGameType::Create);
 
 		//---- Round Finished
 		println!("Finished round {0} in {1}", NUMBER_OF_ROUNDS - i, sec_from_time(round_started));
