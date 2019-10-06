@@ -290,7 +290,7 @@ pub fn create_neural_networks(number: usize) -> Vec<NeuralNetwork>
 
 	for i in 0..number	
 	{
-		nn.push(neural_network::new_neural_network(i as usize, node_count.input_size, node_count.hidden_layer_size, node_count.output_layer_size));
+		nn.push(neural_network::new_neural_network(i as usize, node_count.input_node_count, node_count.hidden_node_count, node_count.output_node_count));
 	}
 
 	nn

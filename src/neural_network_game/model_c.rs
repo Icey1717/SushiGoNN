@@ -48,11 +48,11 @@ pub fn get_nn_input(game: &SushiGoGame) -> Vec<f32>
 	player_state
 }
 
-pub fn get_node_count() -> NodeCount
+pub fn get_node_count() -> NeuralNetworkProperties
 {
-	let input_size: usize = Card::CardMax as usize;
-	let hidden_layer_size: usize = 20;
-	let output_layer_size: usize = Card::CardMax as usize;
+	let input_node_count: usize = Card::CardMax as usize;
+	let hidden_node_count: usize = 20;
+	let output_node_count: usize = Card::CardMax as usize;
 
-	NodeCount{input_size, hidden_layer_size, output_layer_size}
+	NeuralNetworkProperties {input_node_count, hidden_node_count, output_node_count}
 }

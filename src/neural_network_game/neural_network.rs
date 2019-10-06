@@ -8,25 +8,18 @@ use std::path::Path;
 
 const MUTATE_AMOUNT: f32 = 0.01;
 
-pub struct NodeCount
-{
-	pub input_size: usize,
-	pub hidden_layer_size: usize,
-	pub output_layer_size: usize,
-}
-
 #[derive(Clone)]
 #[derive(Serialize, Deserialize)]
-struct NeuralNetworkProperties
+pub struct NeuralNetworkProperties
 {
     // A vector of inputs relating to which cards the player has in their hand.
-    input_node_count: usize,
+    pub input_node_count: usize,
 
     // A vector of hidden layer node activations.
-    hidden_node_count: usize,
+    pub hidden_node_count: usize,
 
     // A vector of outputs used to determine what the nn does. 
-    output_node_count: usize,
+    pub output_node_count: usize,
 }
 
 #[derive(Clone)]
