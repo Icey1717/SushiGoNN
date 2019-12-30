@@ -6,12 +6,12 @@ const SECOND_MOST_MAKI_POINTS: i8 = 	3;
 const TEMPURA_PAIR_POINTS: i16 =		5;
 const SASHIMI_TRIO_POINTS: i16 =		10;
 const DUMPLING_POINTS: [i16; 5] =		[1, 3, 6, 10, 15];
-const SALMON_NIGRI_POINTS: i16 =		10;
-const EGG_NIGRI_POINTS: i16 =			5;
-const SQUID_NIGRI_POINTS: i16 =			5;
-const WASABI_SALMON_NIGRI_POINTS: i16 =	10;
-const WASABI_EGG_NIGRI_POINTS: i16 =	5;
-const WASABI_SQUID_NIGRI_POINTS: i16 =	5;
+const SALMON_NIGRI_POINTS: i16 =		2;
+const EGG_NIGRI_POINTS: i16 =			1;
+const SQUID_NIGRI_POINTS: i16 =			3;
+const WASABI_SALMON_NIGRI_POINTS: i16 =	9;
+const WASABI_EGG_NIGRI_POINTS: i16 =	3;
+const WASABI_SQUID_NIGRI_POINTS: i16 =	6;
 
 const MOST_PUDDING_SCORE: i16 = 		6;
 const LEAST_PUDDING_SCORE: i16 = 		-6;
@@ -61,7 +61,7 @@ pub fn calc_scores_for_round(players: &Vec<Player>, round: u8) -> Vec<i32>
 
         //---- Dumplings
         let mut dumpling_multiplier: usize = x.dumpling_count as usize;
-        
+
         if dumpling_multiplier > 0
         {
             if dumpling_multiplier > MAX_DUMPLINGS
@@ -194,32 +194,30 @@ fn add_maki_roll_score(scores: &mut [i32], results: &[&SushiResult])
 fn find_most_maki_rolls(results: &[&SushiResult], most_maki_rolls: &mut Vec<u8>, second_most_maki_rolls: &mut Vec<u8>)
 {
 	let mut highest_maki_roll_count = 0;
+	let mut second_highest_maki_roll_count = 0;
 
-	for (i, x) in results.iter().enumerate()
-	{ 
-		// If the player had no maki rolls, continue with the loop
-		if x.get_maki_roll_count() <= 0
+	// Work out the highest and second highest counts.
+	for x in results.iter()
+	{
+		let player_maki_roll_count = x.get_maki_roll_count();
+
+		if player_maki_roll_count > highest_maki_roll_count
 		{
-			continue;
+			highest_maki_roll_count = player_maki_roll_count;
+			second_highest_maki_roll_count = highest_maki_roll_count;
 		}
+	}
 
+	// Add players who had those totals to the appropriate vectors.
+	for (i, x) in results.iter().enumerate()
+	{
 		if x.get_maki_roll_count() == highest_maki_roll_count
 		{
 			most_maki_rolls.push(i as u8);
 		}
-		else if x.get_maki_roll_count() > highest_maki_roll_count
+		else if x.get_maki_roll_count() == second_highest_maki_roll_count
 		{
-			highest_maki_roll_count = x.get_maki_roll_count();
-			// This player has less maki rolls than the current lowest, so empty the vector and add this player instead
-			second_most_maki_rolls.clear();
-
-			for x in most_maki_rolls[..].iter()
-			{
-				second_most_maki_rolls.push(*x);
-			}
-			
-			most_maki_rolls.clear();
-			most_maki_rolls.push(i as u8);
+			second_most_maki_rolls.push(i as u8);
         }
 	}
 }

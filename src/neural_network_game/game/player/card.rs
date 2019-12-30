@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Copy,Clone)]
+#[derive(Copy,Clone,Debug,Enum)]
 pub enum Card 
 {
     Pudding,
@@ -103,5 +103,25 @@ pub fn print_cards(cards: &[Card])
 	for (i, x) in cards.iter().enumerate()
 	{
 		println!("{0}: {1}",i,  x);
+	}
+}
+
+pub fn get_sprite_filename(card: &Card) -> &str
+{
+	match card
+	{
+		Card::Pudding => r"res/images/Pudding_64x64x1.png",
+		Card::Dumpling => r"res/images/Dumpling_64x64x1.png",
+		Card::Sashimi => r"res/images/Sashimi_64x64x1.png",
+		Card::Tempura => r"res/images/Tempura_64x64x1.png",
+		Card::MakiRoll1 => r"res/images/Maki_64x64x1.png",
+		Card::MakiRoll2 => r"res/images/TwoMaki_64x64x1.png",
+		Card::MakiRoll3 => r"res/images/ThreeMaki_64x64x1.png",
+		Card::Chopsticks => r"res/images/Chopsticks_64x64x1.png",
+		Card::SalmonNigri => r"res/images/SalmonNigiri_64x64x1.png",
+		Card::EggNigri => r"res/images/EggNigiri_64x64x1.png",
+		Card::SquidNigri => r"res/images/SquidNigiri_64x64x1.png",
+		Card::Wasabi => r"res/images/Wasabi_64x64x1.png",
+		_ => r"",
 	}
 }

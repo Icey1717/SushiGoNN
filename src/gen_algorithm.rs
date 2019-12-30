@@ -1,5 +1,4 @@
 use super::neural_network_game::*;
-use super::neural_network_game::neural_network::*;
 
 use std::time::Instant;
 use rand::Rng;
@@ -23,27 +22,28 @@ pub fn run_generational(games: usize, generations: usize)
 		//let round_started = Instant::now();
 		
 		//---- Play out the round and get an array of the winners
-		let sushi_go_games = create_and_play_games_parallel(games, &mut nn, NUMBER_OF_PLAYERS, NeuralNetworkGameType::Create);
+		let mut sushi_go_games = Vec::new();
+		create_and_play_games_parallel(&mut sushi_go_games, games, &mut nn);
 
 		//---- Round Finished
 		//println!("Finished generation {0} in {1}", i, sec_from_time(round_started));
 
 		// Reset the neural networks we are using to just use the winners.
-		nn = next_generation(sushi_go_games);
+		nn = next_generation(&sushi_go_games);
 	}
 	//---- Complete!
-	println!("The winner is {0} total time was {1}", nn[0].get_id(), sec_from_time(competition_started));
+	println!("The winner is {0} total time was {1}", nn[0].nn.get_id(), sec_from_time(competition_started));
 
 	println!("Generations per second: {}", generations as f64 / sec_from_time(competition_started));
 
 	println!("Games per second: {}", (generations as f64 / sec_from_time(competition_started)) * games as f64);
 
-	let s = format!("{0}_games_in_{1}_generations_{2}", games, generations, nn[0].get_id());
+	let s = format!("{0}_games_in_{1}_generations_{2}", games, generations, nn[0].nn.get_id());
 
-	nn[0].save_nn_to_file(s);
+	nn[0].nn.save_nn_to_file(s);
 }
 
-fn next_generation(games: Vec<NeuralNetworkGame>) -> Vec<NeuralNetwork>
+fn next_generation(games: &Vec<NeuralNetworkGame>) -> Vec<NeuralNetworkGamePlayer>
 {
 	//println!("Generating next generation:");
 	let total_score: f32 = games.iter().map(|game| game.get_game().get_winning_score() as f32)
@@ -52,7 +52,7 @@ fn next_generation(games: Vec<NeuralNetworkGame>) -> Vec<NeuralNetwork>
 	let scores: Vec<f32> = games.iter().map(|game| game.get_game().get_winning_score() as f32)
 	.collect();
 
-	let mut winners: Vec<NeuralNetwork> = games.iter().map(|game| game.get_winning_nn())
+	let mut winners: Vec<NeuralNetworkGamePlayer> = games.iter().map(|game| game.get_winning_nn())
 		.collect();
 
 	let mut fitness = Vec::new();
@@ -79,7 +79,7 @@ fn next_generation(games: Vec<NeuralNetworkGame>) -> Vec<NeuralNetwork>
 	for _i in 0..games.len() * NUMBER_OF_PLAYERS
 	{
 		let mut mutated_nn = chosen.clone();
-		mutated_nn.mutate();
+		mutated_nn.nn.mutate();
 		new_nn.push(mutated_nn);
 	}
 

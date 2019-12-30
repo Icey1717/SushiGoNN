@@ -33,6 +33,7 @@ use score::*;
 const PRINT_DATA: bool = false;
 
 //--------------------------------- Start Game Implementation ------------------------------------
+#[derive(Copy,Clone)]
 pub enum StepResult
 {
 	Success,
@@ -484,21 +485,28 @@ impl SushiGoGame
 			final_scores[i] += *x;
 		}
 
+		// Work out the highest score.
 		let mut highest_score = 0;
-		let mut winner = 0;
 
-		for (i, x) in final_scores.iter().enumerate()
+		for x in final_scores.iter()
+		{
+			if *x >= highest_score
 			{
-				if *x > highest_score
-				{
-					highest_score = *x;
-					winner = i;
-				}
+				highest_score = *x;
 			}
+		}
+
+		// Set players final scores and add any winners to the pot.
+		let mut winners = Vec::new();
 
 		for (i, x) in self.players.iter_mut().enumerate()
 		{
 			x.set_final_score(final_scores[i]);
+
+			if x.get_final_score() == highest_score
+			{
+				winners.push(i);
+			}
 		}
 
 		if PRINT_DATA
@@ -506,7 +514,16 @@ impl SushiGoGame
 			self.print_final_scores();
 		}
 
-		return winner;
+		if winners.len() > 0
+		{
+			// Pick a random winner amongst the players with the highest score.
+			let mut rng = rand::thread_rng();
+			winners.shuffle(&mut rng);
+			return winners[0];
+		}
+
+		println!("No winner!");
+		return 0;
 	}
 }
 

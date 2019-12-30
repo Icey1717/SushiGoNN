@@ -28,9 +28,10 @@ pub fn run_competition()
 		 
 		// Calculate how many games we need to play.
 		let number_of_games = (NUMBER_OF_PLAYERS as i32).pow(i as u32);
-		
+
+		let mut games = Vec::new();
 		//---- Play out the round and get an array of the winners
-		let games = create_and_play_games_parallel(number_of_games as usize, &mut nn, NUMBER_OF_PLAYERS, NeuralNetworkGameType::Create);
+		create_and_play_games_parallel(&mut games, number_of_games as usize, &mut nn);
 
 		//---- Round Finished
 		println!("Finished round {0} in {1}", NUMBER_OF_ROUNDS - i, sec_from_time(round_started));
@@ -43,11 +44,11 @@ pub fn run_competition()
 		nn = winners;
 	}
 	//---- Complete!
-	println!("The winner is {0} total time was {1}", nn[0].get_id(), sec_from_time(competition_started));
+	println!("The winner is {0} total time was {1}", nn[0].nn.get_id(), sec_from_time(competition_started));
 
-	println!("The winner is {0} total time was {1}", nn[0].get_id(), sec_from_time(competition_started));
+	println!("The winner is {0} total time was {1}", nn[0].nn.get_id(), sec_from_time(competition_started));
 
-	let s = format!("winner_of_{0}_competition_{1}", NUMBER_OF_ROUNDS, nn[0].get_id());
+	let s = format!("winner_of_{0}_competition_{1}", NUMBER_OF_ROUNDS, nn[0].nn.get_id());
 
-	nn[0].save_nn_to_file(s);
+	nn[0].nn.save_nn_to_file(s);
 }
