@@ -40,7 +40,7 @@ fn main()
 
 	match guess.trim()
 	{
-		"Play" => setup_random_game(),
+		"Play" => start_game_setup(),
 		"Create" => picked_generational(),
         _ => println!("You didn't enter 'Play', or 'Create'. These are your only options, don't try and find anything else, there isn't anything to find."),
 	}
@@ -53,5 +53,6 @@ fn main()
 
 fn picked_generational()
 {
-	run_generational(64, 1000);
+	run_generational(get_usize_from_player_input("How many games per generation?"),
+					 get_usize_from_player_input("How many generations?"));
 }

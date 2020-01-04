@@ -77,9 +77,9 @@ pub fn calc_scores_for_round(players: &Vec<Player>, round: u8) -> Vec<i32>
         add_score(i as u8, x.salmon_nigri_count * SALMON_NIGRI_POINTS, &mut scores);
         add_score(i as u8, x.egg_nigri_count * EGG_NIGRI_POINTS, &mut scores);
         add_score(i as u8, x.squid_nigri_count * SQUID_NIGRI_POINTS, &mut scores);
-        add_score(i as u8, x.wasabi_salmon_nigri_count * WASABI_SALMON_NIGRI_POINTS, &mut scores);
-        add_score(i as u8, x.wasabi_egg_nigri_count * WASABI_EGG_NIGRI_POINTS, &mut scores);
-        add_score(i as u8, x.wasabi_squid_nigri_count * WASABI_SQUID_NIGRI_POINTS, &mut scores);
+//        add_score(i as u8, x.wasabi_salmon_nigri_count * WASABI_SALMON_NIGRI_POINTS, &mut scores);
+//        add_score(i as u8, x.wasabi_egg_nigri_count * WASABI_EGG_NIGRI_POINTS, &mut scores);
+//        add_score(i as u8, x.wasabi_squid_nigri_count * WASABI_SQUID_NIGRI_POINTS, &mut scores);
     }
 
 

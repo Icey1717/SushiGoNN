@@ -117,6 +117,12 @@ impl NeuralNetworkGame
 		// Keep stepping through the game until we have a winner.
 		while !result.is_game_over() && !display.poll_events().was_closed()
 		{
+			// Print previous round information.
+			if result.is_round_over()
+			{
+				self.game.print_prev_round_results();
+			}
+
 			result = self.step_game(result);
 
 			// Clear the layer (layers could also be drawn multiple times, e.g. a static UI might not need to be updated each frame)
@@ -183,11 +189,6 @@ impl NeuralNetworkGame
 		self.game.get_winner()
 	}
 
-	pub fn get_players(&self) -> &Vec<NeuralNetworkGamePlayer>
-	{
-		&self.players
-	}
-
 	pub fn get_game(&self) -> &SushiGoGame
 	{
 		&self.game
@@ -219,15 +220,15 @@ fn load_card_sprites(renderer: &Renderer) -> EnumMap<Card, Sprite>
 			Card::MakiRoll2 => Sprite::from_file(&renderer.context(), get_sprite_filename(&Card::MakiRoll2)).unwrap(),
 			Card::MakiRoll3 => Sprite::from_file(&renderer.context(), get_sprite_filename(&Card::MakiRoll3)).unwrap(),
 			Card::Chopsticks => Sprite::from_file(&renderer.context(), get_sprite_filename(&Card::Chopsticks)).unwrap(),
-			Card::SalmonNigri => Sprite::from_file(&renderer.context(), get_sprite_filename(&Card::SalmonNigri)).unwrap(),
-			Card::EggNigri => Sprite::from_file(&renderer.context(), get_sprite_filename(&Card::EggNigri)).unwrap(),
-			Card::SquidNigri => Sprite::from_file(&renderer.context(), get_sprite_filename(&Card::SquidNigri)).unwrap(),
+			Card::SalmonNigiri => Sprite::from_file(&renderer.context(), get_sprite_filename(&Card::SalmonNigiri)).unwrap(),
+			Card::EggNigiri => Sprite::from_file(&renderer.context(), get_sprite_filename(&Card::EggNigiri)).unwrap(),
+			Card::SquidNigiri => Sprite::from_file(&renderer.context(), get_sprite_filename(&Card::SquidNigiri)).unwrap(),
 			Card::Wasabi => Sprite::from_file(&renderer.context(), get_sprite_filename(&Card::Wasabi)).unwrap(),
 			_ => Sprite::from_file(&renderer.context(), get_sprite_filename(&Card::Chopsticks)).unwrap(),
     	}
 }
 
-fn get_usize_from_player_input(message: &str) -> usize
+pub fn get_usize_from_player_input(message: &str) -> usize
 {
 	println!("{}", message);
 
@@ -247,7 +248,7 @@ fn get_usize_from_player_input(message: &str) -> usize
 	usize_out
 }
 
-pub fn setup_random_game()
+pub fn start_game_setup()
 {
 	let mut human_players = get_usize_from_player_input("Enter how many players will be human (0 - 4):");
 
@@ -288,12 +289,19 @@ pub fn setup_random_game()
 		batch_count = get_usize_from_player_input("Enter number of batches to do, this will reduce memory overhead:");
 	}
 
-	play_random_game(batch_count, number_of_games, in_file_name, random_players, human_players);
+	let mut print_nn_weights = false;
+
+	if human_players + random_players < NUMBER_OF_PLAYERS
+	{
+		print_nn_weights = get_usize_from_player_input("Print neural network weights?") > 0;
+	}
+
+	start_game(batch_count, number_of_games, in_file_name, random_players, human_players, print_nn_weights);
 }
 
 // Plays three neural networks against an AI picking random choices.
 // Plays number_of_games games per batch. Batches is used to reduce memory usage.
-pub fn play_random_game(batches: usize, number_of_games: usize, in_file_name: String, number_of_random_players: usize, number_of_human_players: usize)
+pub fn start_game(batches: usize, number_of_games: usize, in_file_name: String, number_of_random_players: usize, number_of_human_players: usize, print_nn_weights: bool)
 {
 	let random_started = Instant::now();
 
@@ -303,12 +311,18 @@ pub fn play_random_game(batches: usize, number_of_games: usize, in_file_name: St
 	{
 		print!("Starting batch: {}\n", j);
 		let batch_started = Instant::now();
-
 		let mut new_game_nn = Vec::new();
 
+		// Work out how many neural networks we need, and create an empty one for if we
 		let number_of_neural_networks = NUMBER_OF_PLAYERS - number_of_random_players - number_of_human_players;
-
 		let empty_nn = new_neural_network(0,0,0,0);
+
+		// Load in the neural network if we have any neural network players.
+		let mut loaded_nn = empty_nn.clone();
+		if number_of_neural_networks > 0
+		{
+			loaded_nn = load_nn_from_file(in_file_name.trim());
+		}
 
 		// Pull the players from the pool of neural networks.
 		for _j in 0..number_of_games
@@ -325,7 +339,6 @@ pub fn play_random_game(batches: usize, number_of_games: usize, in_file_name: St
 
 			for _k in 0..number_of_neural_networks
 			{
-				let loaded_nn = load_nn_from_file(in_file_name.trim());
 				new_game_nn.push(NeuralNetworkGamePlayer::new(NeuralNetworkGamePlayerType::NeuralNetwork, loaded_nn.clone()));
 			}
 		}
@@ -334,11 +347,10 @@ pub fn play_random_game(batches: usize, number_of_games: usize, in_file_name: St
 
 		let mut games: Vec<NeuralNetworkGame> = Vec::new();
 
-		create_and_play_games_parallel(&mut games, number_of_games, &mut new_game_nn);
+		create_and_play_games_parallel(&mut games, number_of_games, &mut new_game_nn, print_nn_weights);
 
 		for x in &games
 		{
-			//print!("Winner is {}\n", x.get_winning_id());
 			win_counter[x.get_winning_id()] += 1;
 		}
 
@@ -360,7 +372,8 @@ pub fn play_random_game(batches: usize, number_of_games: usize, in_file_name: St
 // Creates the number of games required for a round and returns the id's of the winning neural networks.
 pub fn create_and_play_games_parallel(	games: &mut Vec<NeuralNetworkGame>,
 										number_of_games: usize,
-									  	nn: &mut Vec<NeuralNetworkGamePlayer>)
+									  	nn: &mut Vec<NeuralNetworkGamePlayer>,
+										print_nn_weights: bool)
 {
 	// Add the number of games we need.
 	for _j in 0..number_of_games
@@ -371,26 +384,31 @@ pub fn create_and_play_games_parallel(	games: &mut Vec<NeuralNetworkGame>,
 		// Setup the game.
 		new_game.setup();
 
+		// Tell the game whether or not to print nn weights.
+		new_game.set_print_nn_weights(print_nn_weights);
+
 		let mut new_game_nn = Vec::new();
 
 		// Pull the players from the pool of neural networks.
 		for _j in 0..NUMBER_OF_PLAYERS
 		{
 			// Check there are nn's in the input array.
-			if nn.len() == 0
+			if nn.len() <= 0
 			{
 				assert!(false, "Ran out of nn players!");
 			}
 
 			// Add the nn to the list of nn's to be used in this game.
-			new_game_nn.push(nn.remove(0));
+			new_game_nn.push(nn.remove(nn.len() - 1));
 		}
 
 		// Add the game to the list of games in this round.
 		games.push(NeuralNetworkGame{game: new_game, players: new_game_nn});
 	}
 
-	//---- Play the games in this round and find the winners.
+	//print!("Setup {} games. Starting parallel play. \n", number_of_games);
+
+	//---- Play the games in this round.
 	play_games_parallel(games);
 }
 
@@ -429,12 +447,6 @@ pub fn create_neural_networks(number: usize) -> Vec<NeuralNetworkGamePlayer>
 fn do_player_turn(game: &SushiGoGame, prev_result: StepResult) -> Card
 {
 	print!("The result for the previous round was {}\n", prev_result);
-
-	// Print previous round information.
-	if prev_result.is_round_over()
-	{
-		game.print_prev_round_results();
-	}
 
 	println!("\nPrinting Current Game State:");
 

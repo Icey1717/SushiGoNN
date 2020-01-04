@@ -6,13 +6,15 @@ use super::game::player::card::*;
 // Use the feed forward algorithm to pick a card from the players current hand.
 pub fn pick_cards(game: &SushiGoGame, nn: &NeuralNetwork) -> Card
 {
+	// Get an array of weights based on the cards in our hand.
     let player_hand = game.get_current_player_hand();
-	
 	let output = nn.feed_forward(&get_nn_input(game));
 
+	// Work out what the highest weighted card we have is.
 	let mut highest_index = 0;
 	let mut highest_value = -1.0;
 
+	// This vector holds valid choices.
 	let mut to_chose_from: Vec<f32> = Vec::new();
 
 	for (i, x) in output.iter().enumerate()
@@ -20,6 +22,7 @@ pub fn pick_cards(game: &SushiGoGame, nn: &NeuralNetwork) -> Card
 		if player_hand.contains(&(Card::from(i))) {to_chose_from.push(*x)} else {to_chose_from.push(0.0)};
 	}
 
+	// Find the highest value valid choice.
 	for (i, x) in to_chose_from.iter().enumerate()
 	{
 		if *x > highest_value
@@ -29,7 +32,17 @@ pub fn pick_cards(game: &SushiGoGame, nn: &NeuralNetwork) -> Card
 		}
 	}
 
-	//println!("Chosen Index is {0} and card is {1}", highest_index, Card::from(highest_index));
+	// Print some info about what we chose if the game has that option set.
+	if game.should_print_nn_weights()
+	{
+		print!("Printing weights:\n");
+		for (i, x) in to_chose_from.iter().enumerate()
+		{
+			print!("With the given hand, weight for {} is: {}\n", Card::from(i), x);
+		}
+
+		println!("Chosen Index is {0} and card is {1}", highest_index, Card::from(highest_index));
+	}
 	
 	Card::from(highest_index)
 }

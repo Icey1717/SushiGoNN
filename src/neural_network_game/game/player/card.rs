@@ -10,22 +10,13 @@ pub enum Card
 	MakiRoll1,
 	MakiRoll2,
 	MakiRoll3,
-	SalmonNigri,
-	EggNigri,
-	SquidNigri,
+	SalmonNigiri,
+	EggNigiri,
+	SquidNigiri,
 	Wasabi,
 
-	// La Combination
-	WasabiSalmonNigri,
-	WasabiEggNigri,
-	WasabiSquidNigri,
-	UsedWasabi,
-
-	// Hashi - Chopsticks turn from fresh to normal when used
-	// They are refreshed at the start of every turn.
+	// Chopsticks turn from fresh to normal when used
 	Chopsticks,
-	FreshChopsticks,
-
 	None,
 	CardMax,
 }
@@ -44,15 +35,10 @@ impl fmt::Display for Card
 			Card::MakiRoll2 => "Maki Roll 2",
 			Card::MakiRoll3 => "Maki Roll 3",
             Card::Chopsticks => "Chopsticks",
-			Card::SalmonNigri => "Salmon Nigri",
-            Card::EggNigri => "Egg Nigri",
-			Card::SquidNigri => "Squid Nigri",
+			Card::SalmonNigiri => "Salmon Nigri",
+            Card::EggNigiri => "Egg Nigri",
+			Card::SquidNigiri => "Squid Nigri",
             Card::Wasabi => "Wasabi",
-			Card::WasabiSalmonNigri => "Salmon Nigri with Wasabi",
-			Card::WasabiEggNigri => "Egg Nigri with Wasabi",
-			Card::WasabiSquidNigri => "Squid Nigri with Wasabi",
-			Card::UsedWasabi => "Used Wasabi",
-			Card::FreshChopsticks => "Fresh Chopsticks",
 			Card::None => "None",
 			Card::CardMax => "Warning",
         };
@@ -82,16 +68,11 @@ impl From<usize> for Card
 			5 => Card::MakiRoll2,
 			6 => Card::MakiRoll3,
             7 => Card::Chopsticks,
-			8 => Card::SalmonNigri,
-            9 => Card::EggNigri,
-			10 => Card::SquidNigri,
+			8 => Card::SalmonNigiri,
+            9 => Card::EggNigiri,
+			10 => Card::SquidNigiri,
             11 => Card::Wasabi,
-			12 => Card::WasabiSalmonNigri,
-			13 => Card::WasabiEggNigri,
-			14 => Card::WasabiSquidNigri,
-			15 => Card::UsedWasabi,
-			16 => Card::FreshChopsticks,
-			17 => Card::None,
+			12 => Card::None,
 			_ => Card::CardMax,
 		}
 	}
@@ -118,9 +99,9 @@ pub fn get_sprite_filename(card: &Card) -> &str
 		Card::MakiRoll2 => r"res/images/TwoMaki_64x64x1.png",
 		Card::MakiRoll3 => r"res/images/ThreeMaki_64x64x1.png",
 		Card::Chopsticks => r"res/images/Chopsticks_64x64x1.png",
-		Card::SalmonNigri => r"res/images/SalmonNigiri_64x64x1.png",
-		Card::EggNigri => r"res/images/EggNigiri_64x64x1.png",
-		Card::SquidNigri => r"res/images/SquidNigiri_64x64x1.png",
+		Card::SalmonNigiri => r"res/images/SalmonNigiri_64x64x1.png",
+		Card::EggNigiri => r"res/images/EggNigiri_64x64x1.png",
+		Card::SquidNigiri => r"res/images/SquidNigiri_64x64x1.png",
 		Card::Wasabi => r"res/images/Wasabi_64x64x1.png",
 		_ => r"",
 	}

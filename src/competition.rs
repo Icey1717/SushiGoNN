@@ -31,7 +31,7 @@ pub fn run_competition()
 
 		let mut games = Vec::new();
 		//---- Play out the round and get an array of the winners
-		create_and_play_games_parallel(&mut games, number_of_games as usize, &mut nn);
+		create_and_play_games_parallel(&mut games, number_of_games as usize, &mut nn, false);
 
 		//---- Round Finished
 		println!("Finished round {0} in {1}", NUMBER_OF_ROUNDS - i, sec_from_time(round_started));

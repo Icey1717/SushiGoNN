@@ -92,14 +92,16 @@ pub struct SushiGoGame
 	game_over: bool,
 	current_round: u8,
 	number_of_players: usize,
-	winner: usize
+	winner: usize,
+	using_chopsticks: bool,
+	print_nn_weights: bool
 }
 
 impl SushiGoGame
 {
 	pub fn new(number_of_players: usize) -> SushiGoGame
 	{
-		return SushiGoGame{deck: Vec::new(), players: Vec::new(), current_player: 0, game_over: false, current_round: 0, number_of_players: number_of_players, winner: 0};
+		return SushiGoGame{deck: Vec::new(), players: Vec::new(), current_player: 0, game_over: false, current_round: 0, number_of_players, winner: 0, using_chopsticks: false, print_nn_weights: false};
 	}
 
 	pub fn setup(&mut self)
@@ -107,6 +109,7 @@ impl SushiGoGame
 		//---- Setup
 		self.current_player = 0;
 		self.game_over = false;
+		self.using_chopsticks = false;
 		self.current_round = 0;
 
 		self.deck = setup_deck();
@@ -179,7 +182,11 @@ impl SushiGoGame
 		{
 			// This will remove a chopsticks from the field and return them to our hand, in the case
 			// that we played another card due to the power of chopsticks.
-			player.return_chopsticks();
+
+			if self.using_chopsticks
+			{
+				player.return_chopsticks();
+			}
 
 			result = if player.choose_card(action) { StepResult::Success } else { StepResult::Error };
 		}
@@ -194,13 +201,14 @@ impl SushiGoGame
 		}
 
 		// Check to see if the current player has fresh chopsticks and give them another turn
-		if player.remove_fresh_chopsticks() && player.get_hand_size() > 0
+		if player.has_chopsticks() && !self.using_chopsticks
 		{
 			if PRINT_DATA
 			{
-				print!("We have fresh chopsticks in our chosen cards, adding none option and letting us take another go.\n");
+				print!("We have chopsticks in our chosen cards, adding none option and letting us take another go.\n");
 			}
 
+			self.using_chopsticks = true;
             player.add_card_to_hand(Card::None);
 			result = StepResult::ChopsticksAvailable;
 			return result;
@@ -219,6 +227,9 @@ impl SushiGoGame
 
 		// Next players turn
 		self.current_player += 1;
+
+		// Reset the chopsticks flag.
+		self.using_chopsticks = false;
 
 		// Round is not over, see if there is another player to act.
 		if self.current_player >= self.number_of_players
@@ -525,6 +536,16 @@ impl SushiGoGame
 		println!("No winner!");
 		return 0;
 	}
+
+	pub fn set_print_nn_weights(&mut self, print_nn_weights: bool)
+	{
+		self.print_nn_weights = print_nn_weights;
+	}
+
+	pub fn should_print_nn_weights(&self) -> bool
+	{
+		self.print_nn_weights
+	}
 }
 
 fn setup_deck() -> Vec<Card>
@@ -537,9 +558,9 @@ fn setup_deck() -> Vec<Card>
 	let mut maki_roll2_vec =	vec![Card::MakiRoll2; MAKI_ROLL_2_COUNT as usize];
 	let mut maki_roll3_vec =	vec![Card::MakiRoll3; MAKI_ROLL_3_COUNT as usize];
 	let mut chopsticks_vec =	vec![Card::Chopsticks; CHOPSTICKS_COUNT as usize];
-	let mut salmon_nigri_vec =	vec![Card::SalmonNigri; SALMON_NIGRI_COUNT as usize];
-	let mut egg_nigri_vec =		vec![Card::EggNigri; EGG_NIGRI_COUNT as usize];
-	let mut squid_nigri_vec =	vec![Card::SquidNigri; SQUID_NIGRI_COUNT as usize];
+	let mut salmon_nigri_vec =	vec![Card::SalmonNigiri; SALMON_NIGRI_COUNT as usize];
+	let mut egg_nigri_vec =		vec![Card::EggNigiri; EGG_NIGRI_COUNT as usize];
+	let mut squid_nigri_vec =	vec![Card::SquidNigiri; SQUID_NIGRI_COUNT as usize];
 	let mut wasabi_vec =		vec![Card::Wasabi; WASABI_COUNT as usize];
 
 	let mut deck = pudding_vec;

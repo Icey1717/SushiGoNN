@@ -17,19 +17,24 @@ pub fn run_generational(games: usize, generations: usize)
 	let competition_started = Instant::now();
 
 	//---- Start a new round of the tournament
-	for _i in 0..generations
+	for i in 0..generations
 	{
 		//let round_started = Instant::now();
 		
 		//---- Play out the round and get an array of the winners
 		let mut sushi_go_games = Vec::new();
-		create_and_play_games_parallel(&mut sushi_go_games, games, &mut nn);
+		create_and_play_games_parallel(&mut sushi_go_games, games, &mut nn, false);
 
 		//---- Round Finished
 		//println!("Finished generation {0} in {1}", i, sec_from_time(round_started));
 
 		// Reset the neural networks we are using to just use the winners.
 		nn = next_generation(&sushi_go_games);
+
+		if i % (generations / 100) == 0
+		{
+			println!("Progress: {}%", (i as f32 / generations as f32) * 100.0);
+		}
 	}
 	//---- Complete!
 	println!("The winner is {0} total time was {1}", nn[0].nn.get_id(), sec_from_time(competition_started));

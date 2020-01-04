@@ -24,7 +24,34 @@ impl SushiResult
 {
 	pub fn get_maki_roll_count(&self) -> i16
 	{
-		return self.maki_roll_count;
+		self.maki_roll_count
+	}
+
+	pub fn add_nigiri(&mut self, nigiri: &Card, has_wasabi: &mut bool)
+	{
+		if *has_wasabi
+		{
+			match nigiri
+			{
+			Card::SalmonNigiri => 	self.wasabi_salmon_nigri_count += 1,
+			Card::EggNigiri => 		self.wasabi_egg_nigri_count += 1,
+			Card::SquidNigiri => 	self.wasabi_squid_nigri_count += 1,
+			_ =>                	{},
+			}
+
+			// Reset the wasabi flag reference.
+			*has_wasabi = false;
+		}
+		else
+		{
+			match nigiri
+			{
+			Card::SalmonNigiri => 	self.salmon_nigri_count += 1,
+			Card::EggNigiri => 		self.egg_nigri_count += 1,
+			Card::SquidNigiri => 	self.squid_nigri_count += 1,
+			_ =>                	{},
+			}
+		}
 	}
 }
 
@@ -104,32 +131,8 @@ impl Player
 		{
 			return false;
 		}
-
-		let mut new_card = card;
-
-		// Mutate nigri cards if we have wasabi.
-		for x in self.chosen_cards.iter_mut()
-		{
-			// For each of our stack, check if we have a wasabi and add this card to it if we do.
-			if x == &Card::Wasabi
-			{
-				// Replace the card we get with a wasabi variant if we have picked that card, or leave it alone otherwise.
-				new_card = if card == Card::SalmonNigri {Card::WasabiSalmonNigri} else if card == Card::EggNigri {Card::WasabiEggNigri} else if card == Card::SquidNigri {Card::WasabiSquidNigri} else {card};
-
-				if new_card != card
-				{
-					if PRINT_DATA
-					{
-						print!("The card chosen was morphed via the power of wasabi into {0}.\n", new_card);
-					}
-
-                    *x = Card::UsedWasabi;
-					break;
-				}
-			}
-		}
 		
-		self.chosen_cards.push(new_card);
+		self.chosen_cards.push(card);
 
 		return true;
 	}
@@ -154,36 +157,24 @@ impl Player
     // ready for a new turn.
 	pub fn sanitize_cards(&mut self)
 	{
-		for x in self.chosen_cards.iter_mut()
-		{
-			if x == &Card::Chopsticks
-			{
-				*x = Card::FreshChopsticks;
-			}
-		}
-
         while self.has_card_in_hand(Card::None)
         {
             self.remove_card_from_hand(Card::None);
         }
 	}
 
-	// Returns true if the player has fresh chopsticks and can take another go. Converts the found
-	// chopsticks back to normal.
-	pub fn remove_fresh_chopsticks(&mut self) -> bool
+	// Returns true if we have chopsticks that we didn't pick this round.
+	pub fn has_chopsticks(&self) -> bool
 	{
-		let mut has_fresh_chopsticks = false;
-
-		for x in self.chosen_cards.iter_mut()
+		for i in 0..self.chosen_cards.len() - 1
 		{
-			if x == &Card::FreshChopsticks
+			if self.chosen_cards[i] == Card::Chopsticks
 			{
-				*x = Card::Chopsticks;
-				has_fresh_chopsticks = true;
+				return true;
 			}
 		}
 
-		return has_fresh_chopsticks;
+		false
 	}
 
 	// Removes the chopsticks we used to pick another card and returns them to our hand.
@@ -260,8 +251,13 @@ impl Player
 
 	fn get_round_results(&self) -> SushiResult
 	{
+		// This struct will keep count of each card for points.
 		let mut round_results = SushiResult{pudding_count: 0, dumpling_count: 0, sashimi_count: 0, tempura_count: 0, maki_roll_count: 0, salmon_nigri_count: 0, egg_nigri_count: 0, squid_nigri_count: 0, wasabi_salmon_nigri_count: 0, wasabi_egg_nigri_count: 0, wasabi_squid_nigri_count: 0};
 
+		// This flag tracks whether the next nigiri card should be dipped in wasabi.
+		let mut has_wasabi = false;
+
+		// Loop through and tally what we have.
 		for x in self.chosen_cards.iter()
 		{
 			match x
@@ -274,16 +270,11 @@ impl Player
 				Card::MakiRoll2 =>			round_results.maki_roll_count += 2,
 				Card::MakiRoll3 =>			round_results.maki_roll_count += 3,
 				Card::Chopsticks =>			{},
-				Card::SalmonNigri =>		round_results.salmon_nigri_count += 1,
-				Card::EggNigri =>			round_results.egg_nigri_count += 1,
-				Card::SquidNigri =>			round_results.squid_nigri_count	+= 1,
-				Card::Wasabi =>				{}
+				Card::SalmonNigiri =>		round_results.add_nigiri(x, &mut has_wasabi),
+				Card::EggNigiri =>			round_results.add_nigiri(x, &mut has_wasabi),
+				Card::SquidNigiri =>		round_results.add_nigiri(x, &mut has_wasabi),
+				Card::Wasabi =>				has_wasabi = true,
 				Card::CardMax =>			{},
-				Card::WasabiSalmonNigri =>	round_results.wasabi_salmon_nigri_count	+= 1,
-				Card::WasabiEggNigri =>		round_results.wasabi_egg_nigri_count += 1,
-				Card::WasabiSquidNigri =>	round_results.wasabi_squid_nigri_count += 1,
-				Card::UsedWasabi =>			{},
-				Card::FreshChopsticks =>	{},
 				Card::None =>				{},
 			}
 		}
